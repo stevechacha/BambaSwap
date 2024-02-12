@@ -25,54 +25,84 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
+            multiDexEnabled = false
             isMinifyEnabled = false
+            isShrinkResources = false
+        }
+        getByName("release") {
+            isDebuggable = false
+            multiDexEnabled = true
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+        compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_1_8
+            targetCompatibility = JavaVersion.VERSION_1_8
+        }
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+
+    val appName = "BambaSwap"
+    val newFileName = "$appName ${defaultConfig.versionName}"
+    android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            val outputFileName = output.outputFile
+            if (outputFileName != null) {
+                val extension = outputFileName.name.substringAfterLast('.')
+                if (extension == "apk" || extension == "aab") {
+                    File(outputFileName.parent, "$newFileName.$extension")
+                }
+            }
+            return@all true
+        }
     }
 }
 
-dependencies {
+    dependencies {
 
-    implementation(libs.core.ktx)
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(libs.constraintlayout)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.espresso.core)
+        implementation(libs.core.ktx)
+        implementation(libs.appcompat)
+        implementation(libs.material)
+        implementation(libs.constraintlayout)
+        testImplementation(libs.junit)
+        androidTestImplementation(libs.androidx.test.ext.junit)
+        androidTestImplementation(libs.espresso.core)
 
-    implementation(libs.lifecycle.common)
-    implementation(libs.lifecycle.livedata)
-    implementation(libs.lifecycle.runtime)
-    implementation(libs.lifecycle.viewmodel)
+        implementation(libs.androidx.fragment.ktx)
+        api(libs.navigation.fragment)
+        api(libs.navigation.ui)
 
-    implementation(libs.koin)
-    implementation(libs.timber)
-    implementation(libs.kotlin.coroutines.core)
-    implementation(libs.kotlin.coroutines.android)
+        implementation(libs.lifecycle.common)
+        implementation(libs.lifecycle.livedata)
+        implementation(libs.lifecycle.runtime)
+        implementation(libs.lifecycle.viewmodel)
 
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.moshi.converter)
-    implementation(libs.logging.interceptor)
+        implementation(libs.koin)
+        implementation(libs.timber)
+        implementation(libs.kotlin.coroutines.core)
+        implementation(libs.kotlin.coroutines.android)
 
-    implementation(libs.moshi)
-    implementation(libs.moshi.adapters)
-    ksp(libs.moshi.codegen)
-    implementation(libs.gson)
-    implementation(libs.browser)
+        implementation(libs.retrofit)
+        implementation(libs.retrofit.moshi.converter)
+        implementation(libs.logging.interceptor)
 
-    api(libs.room.ktx)
-    api(libs.room.runtime)
-    ksp(libs.room.compiler)
-}
+        implementation(libs.moshi)
+        implementation(libs.moshi.adapters)
+        ksp(libs.moshi.codegen)
+        implementation(libs.gson)
+        implementation(libs.browser)
+
+        api(libs.room.ktx)
+        api(libs.room.runtime)
+        ksp(libs.room.compiler)
+    }
